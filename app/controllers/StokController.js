@@ -117,53 +117,20 @@ export const detail = async (req, res) => {
 };
 
 export const uploadVideo = async (req,res) => {
+    
     try {
     const id = req.params.id;
-    const file = req.file;
+    const { video_url, video_path } = req.body;
 
-    if (!file) {
-      return res.redirect(`/stok/detail/${id}?error=Tidak ada file yang diupload`);
-    }
-
-     // Cek stok di database
-    const stok = await Stok.findById(id);
-
-    // Jika video sudah ada
-    if (stok.video_url && stok.video_url !== "") {
-      return res.redirect(`/stok/detail/${id}?error=Video sudah ada, tidak bisa upload ulang`);
-    }
-
-    // Nama file unik
-    const fileName = Date.now() + "-" + file.originalname;
-
-    // Upload ke Supabase Storage
-    const { data, error } = await supabase.storage
-      .from("videos") // nama bucket
-      .upload("stok/" + fileName, file.buffer, {
-        contentType: file.mimetype,
-      });
-
-    if (error) {
-      console.log(error);
-      return res.send("Gagal upload ke Supabase");
-    }
-
-    // Dapatkan public URL
-    const { data: publicURL } = supabase.storage
-      .from("videos")
-      .getPublicUrl("stok/" + fileName);
-
-    // Simpan ke database
     await Stok.findByIdAndUpdate(id, {
-      video_url: publicURL.publicUrl,
-      video_path: `stok/${fileName}`
+      video_url,
+      video_path
     });
 
-    res.redirect("/stok/detail/" + id);
-
+    res.json({ success: true });
   } catch (err) {
     console.log(err);
-    res.send("Terjadi Error");
+    res.json({ success: false, message: "Error saving video URL" });
   }
 }
 
