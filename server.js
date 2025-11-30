@@ -39,9 +39,17 @@ app.use(
     saveUninitialized: false,
     cookie: {
       maxAge: 1000 * 60 * 60, // 1 jam
+
+      // PENTING UNTUK VERCEL:
+      secure: process.env.NODE_ENV === 'production', // Hanya secure=true di produksi (HTTPS)
+      sameSite: 'Lax', // Membantu mengatasi masalah cross-site
     },
   })
 );
+
+// PENTING UNTUK VERCEL:
+// Vercel adalah proxy. Express perlu tahu ini untuk menangani cookies yang aman.
+app.set('trust proxy', 1); 
 
 app.use((req, res, next) => {
   res.locals.user = req.session.userName || null;
