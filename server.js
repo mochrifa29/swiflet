@@ -34,7 +34,7 @@ app.use(express.json());
 //session
 app.use(
   session({
-    secret: "supersecretkey123", 
+    secret: process.env.SESSION_SECRET, 
     resave: false,
     saveUninitialized: false,
     cookie: {
