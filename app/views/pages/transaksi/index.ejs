@@ -1,0 +1,81 @@
+<div
+  class="p-6"
+>
+  <!-- Tombol Tambah -->
+  <div class="flex justify-between items-center mt-6">
+    <h1 class="text-2xl font-semibold"><%= title %></h1>
+    <a
+      href="/transaksi/create"
+      class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+    >
+      <svg data-lucide="plus" class="w-5 h-5"></svg>
+      Tambah
+    </a>
+  </div>
+
+  <!-- Tabel -->
+  <div class="mt-4 bg-white shadow rounded-lg p-4">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-gray-100 text-gray-700 uppercase text-sm">
+          <tr>
+            <th class="p-3">#</th>
+            <th class="p-3">Invoice</th>
+            <th class="p-3">Name</th>
+            <th class="p-3">Date</th>
+            <th class="p-3">Total Berat</th>
+            <th class="p-3">Total Belanja</th>
+            <th class="p-3">Keterangan</th>
+            <th class="p-3">Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (transaksi.length === 0) { %>
+            <tr>
+                <td colspan="3" class="text-center p-3 text-gray-500">
+                  Data tidak ada
+                </td>
+            </tr>
+          <% } else { %>
+          <% transaksi.forEach((t, i) => { %>
+            <%
+              const formatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+            %>
+              <tr class="border-b hover:bg-gray-50">
+                <td class="p-3"><%= i + 1 %></td>
+                <td class="p-3"><%= t.invoice %></td>
+                <td class="p-3"><%= t.nama_pembeli %></td>
+                <td class="p-3">
+                  <%= 
+                    new Intl.DateTimeFormat('id-ID', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric'
+                    }).format(new Date(t.tanggal_transaksi))  
+                  %>
+                </td>
+                <td class="p-3"><%= Intl.NumberFormat('id-ID').format(t.total_berat) %> Gram</td>
+                <td class="p-3"><%= Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(t.total_belanja) %></td>
+                <td class="p-3"><%= t.keterangan %></td>
+                <td class="p-3" x-data="detailModal">
+                  <div class="items-center justify-center">
+                    <a
+                      href="/transaksi/detail/<%= t._id %>"
+                      class="text-blue-600 hover:text-blue-800"
+                    >
+                      <svg data-lucide="eye" class="w-5 h-5"></svg>
+                    </a>
+                  </div>
+                </td>
+                
+              </tr>
+          <% }) %>
+
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+

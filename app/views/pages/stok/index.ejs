@@ -1,0 +1,265 @@
+<style>
+  .toggle-track {
+    width: 50px;
+    height: 26px;
+    background: #ccc;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .toggle-knob {
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .active {
+    background: #22c55e; /* green-500 */
+  }
+
+  .active .toggle-knob {
+    transform: translateX(24px);
+  }
+</style>
+
+
+
+<div x-data="{ openAdd:false, openEdit:false, openDelete:false }" class="p-6">
+  <!-- Tombol Tambah -->
+  <div class="flex justify-between items-center mt-6">
+    <h1 class="text-2xl font-semibold"><%= title %></h1>
+    <a
+      href="/stok/create"
+      class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+    >
+      <svg data-lucide="plus" class="w-5 h-5"></svg>
+      Tambah
+    </a>
+  </div>
+
+  
+    <!-- Toast Notification -->
+    <div id="toast"
+      class="hidden fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg 
+            bg-white border border-gray-200 flex items-center gap-3
+            transition-all duration-300 opacity-0 scale-90">
+      
+      <!-- Icon -->
+      <div id="toastIcon"></div>
+
+      <!-- Text -->
+      <p id="toastText" class="text-sm font-medium text-gray-700"></p>
+    </div>
+
+  <!-- Tabel -->
+  <div class="mt-4 bg-white shadow rounded-lg p-4">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-gray-100 text-gray-700 uppercase text-sm">
+          <tr>
+            <th class="p-3">#</th>
+            <th class="p-3">Nama Barang</th>
+            <th class="p-3">Grade</th>
+            <th class="p-3">Berat (Gr)</th>
+            <th class="p-3">Ready</th>
+            <th class="p-3">Detail</th>
+            <th class="p-3 text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (stok.length === 0) { %>
+            <tr>
+                <td colspan="3" class="text-center p-3 text-gray-500">
+                  Data tidak ada
+                </td>
+            </tr>
+          <% } else { %>
+            <%= total=0; %>
+            <% stok.forEach((s, i) => { %>
+              <%
+                  const formatter = new Intl.NumberFormat('id-ID');
+              %>
+              <tr class="border-b hover:bg-gray-50" x-data="inlineEdit('<%= s._id %>', <%= s.berat %>)">
+                <td class="p-3"><%= i + 1 %></td>
+                <td class="p-3"><%= s.barang.nama_barang %></td>
+                <td class="p-3"><%= s.barang.grade %></td>
+                <td class="p-3">
+                    <template x-if="!editing">
+                      <span @click="editing = true" class="cursor-pointer">
+                        <span x-text="formattedBerat()"></span> Gram
+                      </span>
+                    </template>
+
+                    <template x-if="editing">
+                      <div class="flex items-center gap-2">
+                        <!-- Input -->
+                        <input
+                          type="text"
+                          x-model="tempBerat"
+                          class="w-28 border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
+                          placeholder="Berat (gram)"
+                        />
+
+                        <!-- Tombol Simpan -->
+                        <button
+                          @click="save()"
+                          class="inline-flex items-center px-3 py-1 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition"
+                        >
+                          Simpan
+                        </button>
+
+                        <!-- Tombol Batal -->
+                        <button
+                          @click="cancel()"
+                          class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition"
+                        >
+                          Batal
+                        </button>
+                      </div>
+                    </template>
+
+                </td>
+              <!-- kolom toggle -->
+                <td class="p-3 text-center">
+                    <div 
+                      class="toggle-track <%= s.ready ? 'active' : '' %>"
+                      onclick="toggleReady('<%= s._id %>', this)"
+                    >
+                      <div class="toggle-knob"></div>
+                    </div>
+
+                </td>
+
+                <td class="p-3 text-center">
+                  <a href="/stok/detail/<%= s._id %>"
+                    class="text-blue-600 hover:text-blue-800">
+                    <i data-lucide="eye" class="w-5 h-5"></i>
+                  </a>
+                </td>
+                <td class="p-3">
+                  <div class="flex items-center justify-center gap-3">
+                  
+
+                    <!-- Delete -->
+                    <a
+                      href="/stok/delete/<%= s._id %>"
+                      onclick="return confirm('Apakah anda yakin ingin menghapus barang ini?');"
+                      class="text-red-600 hover:text-red-800"
+                    >
+                      <svg data-lucide="trash" class="w-5 h-5"></svg>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+
+            <% }) %>
+
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  
+</div>
+
+<script>
+function inlineEdit(id, berat) {
+  return {
+    editing: false,
+    tempBerat: berat,
+    originalBerat: berat,
+    formattedBerat() {
+      return new Intl.NumberFormat('id-ID').format(this.tempBerat);
+    },
+    save() {
+      // kirim request ke backend (misal fetch API)
+      fetch(`/stok/update/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ berat: this.tempBerat })
+      })
+      .then(res => res.json())
+      .then(data => {
+        this.originalBerat = this.tempBerat;
+          this.editing = false;
+      })
+      
+    },
+    cancel() {
+      this.tempBerat = this.originalBerat;
+      this.editing = false;
+    }
+  }
+}
+
+function showToast(message, type = "success") {
+    const toast = document.getElementById("toast");
+    const text = document.getElementById("toastText");
+    const icon = document.getElementById("toastIcon");
+
+    text.textContent = message;
+
+   if (type === "success") {
+      icon.innerHTML = `
+        <i data-lucide="check-circle" class="w-7 h-7 text-green-600"></i>
+      `;
+    } else {
+      icon.innerHTML = `
+        <i data-lucide="info" class="w-7 h-7 text-blue-600"></i>
+      `;
+    }
+
+    // re-render lucide setelah inject icon
+    lucide.createIcons();
+
+    // tampilkan
+    toast.classList.remove("hidden");
+    setTimeout(() => toast.classList.remove("opacity-0", "scale-90"), 10);
+
+    // hilangkan otomatis
+    setTimeout(() => {
+      toast.classList.add("opacity-0", "scale-90");
+      setTimeout(() => toast.classList.add("hidden"), 300);
+    }, 1600);
+  }
+
+
+
+ function toggleReady(id, el) {
+    el.classList.toggle("active");
+
+    const newReady = el.classList.contains("active");
+
+    fetch(`/stok/ready/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ ready: newReady })
+    })
+    .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          showToast(
+            newReady ? `${data.nama_barang} ${data.grade} sudah READY` : `${data.nama_barang} ${data.grade} berhasil di-set NOT READY`,
+            newReady ? "success" : "info"
+          );
+        }
+      })
+    .catch(err => console.error(err));
+  }
+
+    
+
+
+</script>
+

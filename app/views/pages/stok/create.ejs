@@ -1,0 +1,66 @@
+<!-- Input form -->
+<div class="bg-white rounded-2xl shadow p-6 max-w-sm mx-auto">
+  <h2 class="text-lg font-medium mb-4">Tambah Barang</h2>
+<form action="/stok/store" method="post">
+<div class="space-y-4">
+   <div class="mb-4">
+      <label class="text-sm font-medium">Nama Barang</label>
+      <select
+        name="barang"
+        class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 bg-white"
+      >
+        <option value="">-- Pilih Barang --</option>
+        <% barangs.forEach(b => { %>
+          <option value="<%= b._id %>">
+            <%= b.nama_barang %> - <%= b.grade %>
+          </option>
+        <% }) %>
+      </select>
+    </div>
+
+
+   <div x-data="beratInput()"  class="w-full max-w-sm">
+      <label class="text-sm font-medium">Berat (gram)</label>
+      <input
+        type="text"
+        x-model="display"
+        @input="formatBerat($event)"
+        class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400"
+      />
+       <% if (errors.berat) { %>
+          <small class="text-red-600"><%= errors.berat %></small>
+        <% } %>
+      <!-- hidden untuk dikirim ke backend -->
+      <input type="hidden" name="berat" :value="value" />
+    </div>
+
+    <button
+      type="submit"
+      class="w-full rounded-xl bg-indigo-600 text-white py-2 text-sm font-medium hover:bg-indigo-700"
+    >
+      Simpan
+    </button>
+  </div>
+</form>
+  
+</div>
+<script>
+function beratInput() {
+  const formatter = new Intl.NumberFormat('id-ID'); // format ribuan
+  return {
+    value: '',    // angka murni
+    display: '',  // tampilan dengan ribuan
+    formatBerat(event) {
+      // ambil angka saja
+      this.value = event.target.value.replace(/\D/g, '');
+      // format ribuan
+      this.display = this.value ? formatter.format(this.value) : '';
+    }
+  }
+}
+</script>
+
+
+
+
+   

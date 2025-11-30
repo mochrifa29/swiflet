@@ -1,0 +1,70 @@
+<!-- Input form -->
+<div class="bg-white rounded-2xl shadow p-6 max-w-sm mx-auto">
+  <h2 class="text-lg font-medium mb-4">Tambah Barang</h2>
+<form action="/barang/store" method="post" enctype="multipart/form-data">
+<div class="space-y-4">
+    <div>
+      <label class="text-sm font-medium">Nama Barang</label>
+      <input
+        type="text"
+        name="nama_barang"
+        value="<%= oldData.nama_barang || '' %>"
+        class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400"
+      />
+      <% if (errors.nama_barang) { %>
+          <small class="text-red-600"><%= errors.nama_barang %></small>
+        <% } %>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium">Grade</label>
+
+      <select
+        name="grade"
+        class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-400"
+      >
+        <option value="">-- Pilih Grade --</option>
+
+        <option value="Grade A" <%= oldData.grade === "Grade A" ? "selected" : "" %>>Grade A</option>
+        <option value="Grade B" <%= oldData.grade === "Grade B" ? "selected" : "" %>>Grade B</option>
+        <option value="Grade C" <%= oldData.grade === "Grade C" ? "selected" : "" %>>Grade C</option>
+      </select>
+
+      <% if (errors.grade) { %>
+        <small class="text-red-600"><%= errors.grade %></small>
+      <% } %>
+    </div>
+
+
+     <!-- UPLOAD FOTO -->
+      <div>
+        <label class="text-sm font-medium">Foto Barang</label>
+
+        <input
+          type="file"
+          name="foto"
+          accept="image/*"
+          class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-400"
+        />
+
+        <% if (errors.foto) { %>
+          <small class="text-red-600"><%= errors.foto %></small>
+        <% } %>
+      </div>
+
+
+    <button
+      type="submit"
+      class="w-full rounded-xl bg-indigo-600 text-white py-2 text-sm font-medium hover:bg-indigo-700"
+    >
+      Simpan
+    </button>
+  </div>
+</form>
+  
+</div>
+
+
+
+
+   

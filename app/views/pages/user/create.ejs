@@ -1,0 +1,56 @@
+<!-- Input form -->
+<div class="bg-white rounded-2xl shadow p-6 max-w-sm mx-auto">
+  <h2 class="text-lg font-medium mb-4">Tambah Barang</h2>
+<form action="/user/store" method="post">
+<div class="space-y-4">
+    <div>
+      <label class="text-sm font-medium">Name</label>
+      <input
+        type="text"
+        name="name"
+        value="<%= oldData.name || '' %>"
+        class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400"
+      />
+      <% if (errors.name) { %>
+          <small class="text-red-600"><%= errors.name %></small>
+        <% } %>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium">Email</label>
+      <input
+        type="email"
+        name="email"
+         value="<%= oldData.email || '' %>"
+        class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400"
+      />
+      <% if (errors.email) { %>
+          <small class="text-red-600"><%= errors.email %></small>
+        <% } %>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium">Password</label>
+      <input
+        type="password"
+        name="password"
+        class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400"
+      />
+      <% if (errors.password) { %>
+          <small class="text-red-600"><%= errors.password %></small>
+        <% } %>
+    </div>
+
+    <button
+      type="submit"
+      class="w-full rounded-xl bg-indigo-600 text-white py-2 text-sm font-medium hover:bg-indigo-700"
+    >
+      Simpan
+    </button>
+  </div>
+</form>
+  
+</div>
+
+
+   

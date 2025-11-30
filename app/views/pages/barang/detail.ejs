@@ -1,0 +1,31 @@
+<div class="p-6 flex justify-center">
+  <!-- Card kosong dengan ukuran tetap -->
+  <div class="bg-white shadow-md rounded-lg w-[250px] h-[120px]">
+      <!-- Card -->
+    <div class="bg-white shadow-md rounded-lg w-[500px] h-[150px] flex overflow-hidden">
+       <!-- Gambar kiri -->
+      <div class="w-[200px] h-full flex items-center justify-center bg-gray-100 overflow-hidden">
+        <img src="<%= barang.foto %>" alt="" width="250px" height="100px">
+      </div>
+
+    <!-- Konten kanan -->
+<div class="flex-1 p-4 flex flex-col gap-2">
+  <!-- Tombol kembali -->
+  <button 
+    class="flex items-center gap-1 text-gray-600 hover:text-gray-900"
+    onclick="history.back()"
+  >
+    <!-- Icon Lucide -->
+    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+    Kembali
+  </button>
+
+  <!-- Info barang -->
+  <h2 class="text-lg font-semibold"><%= barang.nama_barang %></h2>
+  <p class="text-gray-600 text-sm">Grade: <%= barang.grade %></p>
+</div>
+          
+    </div>
+    
+  </div>
+</div>

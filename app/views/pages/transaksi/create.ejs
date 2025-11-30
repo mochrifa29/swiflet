@@ -1,0 +1,572 @@
+<div x-data="cartComponent()" class="max-w-5xl mx-auto">
+  <h1 class="text-2xl font-semibold mb-6">Form Input Transaksi</h1>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Input form -->
+    <div class="bg-white rounded-2xl shadow p-6">
+      <h2 class="text-lg font-medium mb-4">Tambah Barang</h2>
+
+      <div class="space-y-4">
+        <div class="mb-4">
+            <label class="text-sm font-medium">Nama Barang</label>
+            <select
+              x-model="barang"
+              class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 bg-white"
+            >
+              <option value="">-- Pilih Barang --</option>
+              <% barangs.forEach(b => { %>
+                <option value="<%= b._id %>">
+                  <%= b.nama_barang %>
+                </option>
+              <% }) %>
+            </select>
+             <p class="text-red-500 text-sm" x-text="errors.barang"></p>
+        </div>
+
+        <div>
+          <label class="text-sm font-medium">Berat (gram)</label>
+          <input
+            type="text"
+            x-model="berat_display"
+            @input="formatGram"
+            class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400"
+          />
+           <p class="text-red-500 text-sm" x-text="errors.berat"></p>
+
+        </div>
+
+         <div>
+          <label class="text-sm font-medium">Harga (/kg)</label>
+          <input
+            type="text"
+            x-model="harga_display"
+            @input="formatRupiah"
+            class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400"
+          />
+          
+        <p class="text-red-500 text-sm" x-text="errors.harga"></p>
+        </div>
+        
+        <button
+          @click="addItem()"
+          class="w-full rounded-xl bg-indigo-600 text-white py-2 text-sm font-medium hover:bg-indigo-700"
+        >
+          Tambah ke Keranjang
+        </button>
+      </div>
+
+      
+
+
+
+    </div>
+
+    <!-- Keranjang -->
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow p-6">
+      <h2 class="text-lg font-medium mb-4">Keranjang Barang</h2>
+      <div class="overflow-x-auto">
+         <table class="min-w-full text-sm">
+          <thead>
+            <tr class="text-slate-500 border-b">
+              <th class="text-left py-2 px-3">Nama</th>
+              <th class="text-center py-2 px-3">Berat</th>
+              <th class="text-center py-2 px-3">Harga/kg</th>
+              <th class="text-left py-2 px-3">Subtotal</th>
+              <th class="text-center py-2 px-3">Aksi</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- Jika kosong -->
+            <tr x-show="items.length === 0">
+              <td colspan="5" class="text-center py-6 text-slate-400">
+                Keranjang kosong
+              </td>
+            </tr>
+
+            <!-- List item -->
+            <template x-for="(item, i) in items" :key="i">
+               <!-- Alpine template start -->
+              <tr class="border-b hover:bg-slate-50">
+                <td class="py-2 px-3 text-left" x-text="item.name"></td>
+                <td class="py-2 px-3 text-center" x-text="formatBerat(item.berat)"></td>
+                <td class="py-2 px-3 text-center" x-text="rupiah(item.harga)"></td>
+                <td class="py-2 px-3 text-left" x-text="rupiah(item.sub_total)"></td>
+                <td class="py-2 px-3 text-center"> 
+                   <!-- Tombol Hapus -->
+                    <button @click="removeItem(i)" class="text-red-600">
+                        Hapus
+                    </button>
+                </td>
+
+              </tr>
+              <!-- Alpine template end -->
+            </template>
+          </tbody>
+        </table>
+      </div>
+      <!-- Ringkasan -->
+      <div
+      
+        class="mt-6 bg-white rounded-2xl shadow p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4"
+      >
+        <!-- Total Berat -->
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-indigo-500" data-lucide="package"></svg>
+          <div>
+            <p class="text-sm text-slate-500">Total Berat</p>
+            <p class="text-lg font-semibold text-slate-700">
+              <span x-text="formatBerat(totalBerat())"></span> g
+            </p>
+          </div>
+        </div>
+
+        <!-- Total Harga -->
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-500" data-lucide="dollar-sign"></svg>
+          <div>
+            <p class="text-sm text-slate-500">Total Harga</p>
+            <p class="text-lg font-semibold text-emerald-700">
+              <span x-text="rupiah(totalHarga())"></span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Tombol Kosongkan Keranjang -->
+        <button
+          @click="clearCart()"
+          class="mt-2 md:mt-0 rounded-xl border border-rose-300 text-rose-600 px-4 py-2 text-sm hover:bg-rose-50 flex items-center gap-1"
+        >
+          <svg class="w-4 h-4 stroke-rose-600" data-lucide="trash-2"></svg>
+          Kosongkan
+        </button>
+      </div>
+      <!-- Tombol Checkout -->
+<div>
+
+  
+
+  <!-- Tombol Checkout -->
+  <button
+    @click="checkout()"
+    class="mt-2 md:mt-5 p-3 w-full items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 text-sm font-medium shadow-sm transition-all"
+  >
+    Checkout
+  </button>
+
+</div>
+
+
+    </div>
+  </div>
+ 
+
+    <!-- Modal -->
+    <div 
+      x-show="open"
+      class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center px-4"
+      x-transition
+    >
+      <div 
+        @click.outside="open = false"
+        class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl"
+        x-transition.scale
+      >
+
+        <h2 class="text-lg font-semibold mb-4">Checkout</h2>
+
+        <!-- Info Total (Rapi, shadcn style) -->
+        <div class="space-y-4 mb-4">
+
+          <!-- Total Berat -->
+          <div class="space-y-1.5">
+            <label class="text-sm font-medium text-gray-700">Total Berat (gram)</label>
+            <input 
+              type="text"
+              :value="formatBerat(modal_total_berat) + ' gram'"
+              disabled
+              class="w-full rounded-lg border border-gray-300 bg-gray-100 text-gray-600 px-3 py-2 text-sm"
+            >
+          </div>
+
+          <!-- Total Belanja -->
+          <div class="space-y-1.5">
+            <label class="text-sm font-medium text-gray-700">Total Belanja</label>
+            <input 
+              type="text"
+              :value="rupiah(modal_total_harga)"
+              disabled
+              class="w-full rounded-lg border border-gray-300 bg-gray-100 text-gray-600 px-3 py-2 text-sm"
+            >
+          </div>
+
+        </div>
+
+
+        <!-- Input Nama Pembeli -->
+        <div class="mb-4">
+          <label class="text-sm font-medium text-gray-700">Nama Pembeli</label>
+          <input 
+            type="text" 
+            x-model="nama_pembeli"
+            class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400"
+            placeholder="Masukkan nama pembeli"
+          >
+        </div>
+
+        <!-- Input Bayar -->
+        <div class="mb-4">
+          <label class="text-sm font-medium text-gray-700">Bayar</label>
+          <input 
+            x-model="bayar_display"
+            @input="formatBayar()"
+            class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400"
+            placeholder="Jumlah uang diterima"
+          >
+        </div>
+
+         <!-- Input Keterangan -->
+        <div class="mb-4">
+          <label class="text-sm font-medium text-gray-700">Keterangan</label>
+          <textarea 
+            x-model="keterangan"
+            class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400"
+            placeholder="Keterangan"
+          >
+          </textarea>
+        </div>
+
+        <!-- Button -->
+        <div class="flex justify-end gap-2">
+          <button 
+            class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+            @click="open = false"
+          >
+            Batal
+          </button>
+
+          <button 
+            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+            @click="prosesPembayaran()"
+          >
+            Proses
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+
+
+    <!-- Modal Berhasil -->
+    <div 
+      x-show="open_success"
+      x-transition.opacity
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+    >
+      <div 
+        x-transition.scale
+        class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-gray-200"
+      >
+
+        <!-- Header -->
+        <div class="flex items-center gap-2 mb-4">
+          <div class="h-10 w-10 flex items-center justify-center rounded-full bg-green-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4"></path>
+              <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+          </div>
+          <h2 class="text-xl font-semibold text-gray-800">Pembayaran Berhasil</h2>
+        </div>
+
+        <div class="space-y-2 text-gray-700">
+
+          <div class="flex justify-between border-b pb-2">
+            <span class="font-medium">Nama Pembeli</span>
+            <span x-text="nama_pembeli" class="font-semibold text-gray-900"></span>
+          </div>
+
+          <div class="flex justify-between">
+            <span class="font-medium">Total Belanja</span>
+            <span x-text="rupiah(modal_total_harga)" class="font-semibold"></span>
+          </div>
+
+          <div class="flex justify-between">
+            <span class="font-medium">Dibayar</span>
+            <span x-text="rupiah(bayar)" class="font-semibold"></span>
+          </div>
+
+          <div class="flex justify-between text-lg pt-3 border-t mt-2">
+            <span class="font-semibold text-green-700">Kembalian</span>
+            <span 
+              x-text="rupiah(kembalian)" 
+              class="font-bold text-green-700"
+            ></span>
+          </div>
+
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex justify-end gap-3 mt-6">
+          <button 
+            class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition"
+            @click="
+              open_success = false; 
+              nama_pembeli = '';
+              bayar = 0;
+              bayar_display = '';
+            "
+          >
+            Tutup
+          </button>
+
+          <button 
+            class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm transition"
+            @click="printNota()"
+          >
+            Print Nota
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+</div>
+<script>
+
+window.barangs = <%- JSON.stringify(barangs) %>
+function cartComponent() {
+  return {
+        barang: "",
+        berat :0,
+        harga:0,
+        harga_display:"",
+        berat_display:"",
+        items: [],
+        barangs : window.barangs,
+        open:false,
+        nama_pembeli:"",
+        bayar: 0,            // nilai asli angka
+        bayar_display: "",   // tampilan input (50.000)
+        modal_total_harga: 0,
+        modal_total_berat: 0,
+        kembalian:0,
+        keterangan:"",
+        open_success: false,
+        errors: {
+                  berat: "",
+                  harga: "",
+                  barang: ""
+                },
+        formatGram() {
+            // buang semua karakter kecuali angka
+            let raw = this.berat_display.replace(/\D/g, "");
+
+            // simpan angka asli
+            this.berat = Number(raw);
+
+            // format ribuan (tanpa Rp)
+            this.berat_display = this.berat.toLocaleString("id-ID");
+        },
+        formatRupiah() {
+            // buang semua karakter kecuali angka
+            let raw = this.harga_display.replace(/\D/g, "");
+
+            // simpan angka asli
+            this.harga = Number(raw);
+
+            // format ribuan (tanpa Rp)
+            this.harga_display = this.harga.toLocaleString("id-ID");
+        },
+        formatBayar() {
+            // hapus semua char kecuali angka
+            let raw = this.bayar_display.replace(/\D/g, "");
+
+            // simpan angka asli
+            this.bayar = Number(raw);
+
+            // tampilkan dalam format rupiah (tanpa "Rp")
+            this.bayar_display = this.bayar.toLocaleString("id-ID");
+        },
+        cleanNumber(value) {
+            return Number(String(value).replace(/[^0-9]/g, ""));
+        },
+        init() {
+   
+            // load dari localStorage
+            const saved = localStorage.getItem("keranjang_walet");
+            if (saved) this.items = JSON.parse(saved);
+
+            // simpan otomatis kalau berubah
+            this.$watch("items", val => {
+                localStorage.setItem("keranjang_walet", JSON.stringify(val));
+            });
+
+          
+        },
+        validateInputs() {
+            // reset semua error
+            this.errors.berat = "";
+            this.errors.harga = "";
+            this.errors.barang = "";
+            
+            let hasError = false;
+
+            // Berat
+            if (!this.berat || Number(this.berat) === 0) {
+                this.errors.berat = "Berat belum diisi.";
+                hasError = true;
+            }
+
+            // Harga
+            if (!this.harga || Number(this.harga) === 0) {
+                this.errors.harga = "Harga belum diisi.";
+                hasError = true;
+            }
+
+            // Barang
+            const barang = this.barangs.find(b => b._id === this.barang);
+            if (!barang) {
+                this.errors.barang = "Barang belum dipilih.";
+                hasError = true;
+            }
+
+            if (hasError) return false; // hentikan proses
+            return true;
+        },
+        addItem() {
+
+          if (!this.validateInputs()) return;
+          // Ambil barang lengkap berdasarkan _id
+         const barang = this.barangs.find(b => b._id === this.barang);
+         const total = Math.round((this.berat / 1000) * (Number(this.harga) / 1000));
+
+          this.items.push({
+            name: barang.nama_barang,
+            berat : this.berat,
+            harga : Number(this.harga),
+            sub_total: total
+          });
+
+          
+          
+
+         // Reset field setelah dimasukkan
+          this.barang = "";     // reset select barang
+          this.berat_display = "";      // reset input berat
+          this.berat = 0;      // reset input berat
+          this.harga_display="";
+          this.harga=0;
+      
+        },
+        checkout(){
+             
+
+            if (this.items.length === 0) {
+                alert("Keranjang masih kosong!");
+                return;
+            }
+
+            // buka modal
+            this.open = true;
+
+            // siapkan data modal
+            this.modal_total_harga = this.totalHarga();
+            this.modal_total_berat = this.totalBerat();
+
+        },
+        prosesPembayaran() {
+            // Validasi nama pembeli
+            if (!this.nama_pembeli || this.nama_pembeli.trim() === "") {
+                alert("Nama pembeli wajib diisi!");
+                return;
+            }
+
+            // Validasi keterangan
+            if (!this.keterangan || this.keterangan.trim() === "") {
+                alert("Keterangan wajib diisi!");
+                return;
+            }
+
+            // Validasi bayar
+            if (!this.bayar || this.bayar < this.modal_total_harga) {
+                alert("Uang bayar kurang!");
+                return;
+            }
+
+
+            this.kembalian = this.bayar - Math.round(this.modal_total_harga);
+
+           
+
+            fetch("/transaksi/store", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                  nama_pembeli: this.nama_pembeli,
+                  items: this.items,
+                  total_berat: this.modal_total_berat,
+                  total_belanja: Math.round(this.modal_total_harga),
+                  bayar: this.bayar,
+                  kembalian: this.kembalian,
+                  keterangan : this.keterangan
+              })
+            }).then(res => res.json())
+            .then(data =>{
+              if (data.success) {
+                 // tutup modal
+            this.open = false;
+
+             // Buka modal sukses
+            this.open_success = true;
+
+            // reset keranjang
+            this.clearCart();
+              }
+            })
+
+           
+
+         
+        },
+        removeItem(i) {
+          this.items.splice(i, 1);
+        },
+        clearCart() {
+           this.items = [];
+            localStorage.removeItem("keranjang_walet");
+        },
+        totalHarga() {
+          return this.items.reduce((t, i) => t + ((i.berat / 1000) * (i.harga / 1000)), 0);
+        },
+        totalBerat() {
+          return this.items.reduce((t, i) => t + Number(i.berat), 0);
+        },
+        rupiah(val) {
+          return new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
+            minimumFractionDigits: 0,
+          }).format(val);
+        },
+        formatBerat(val) {
+          return new Intl.NumberFormat("id-ID", { minimumFractionDigits: 0 }).format(val);
+        }
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+

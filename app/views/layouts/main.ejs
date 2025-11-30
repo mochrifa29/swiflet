@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+
+    <link rel="stylesheet" href="/css/style.css" />
+    
+
+    <script src="/js/lucide.js"></script>
+    
+    
+    <script src="/js/alpine.js" defer></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+
+  <body x-data="{ collapsed: false, mobileOpen: false }" class="bg-gray-100">
+   
+
+    <!-- NAVBAR MOBILE -->
+    <nav
+      class="md:hidden top-0 left-0 w-full h-14 bg-white shadow flex items-center px-4 justify-between z-40 relative"
+    >
+      <!-- Hamburger -->
+      <button @click="mobileOpen = !mobileOpen" class="p-2 z-20">
+        <i data-lucide="menu" class="w-7 h-7"></i>
+      </button>
+
+      <!-- Nama Toko -->
+      <div
+        class="absolute left-1/2 -translate-x-1/2 text-black font-bold text-lg"
+      >
+        Walet
+      </div>
+
+      <!-- Logout -->
+      <a href="/logout" class="p-2 text-black z-20">
+        <i data-lucide="log-out" class="w-6 h-6"></i>
+      </a>
+    </nav>
+
+    <!-- OVERLAY MOBILE -->
+    <div
+      class="fixed inset-0 z-40 md:hidden"
+      x-show="mobileOpen"
+      @click="mobileOpen = false"
+      x-transition.opacity
+    ></div>
+
+    <!-- SIDEBAR -->
+    <%- include('../partials/sidebar') %>
+
+    <!-- CONTENT -->
+    <main
+      class="overflow-y-auto pt-14 md:pt-4"
+      :style="window.innerWidth >= 768 
+      ? (collapsed ? 'margin-left: 5rem' : 'margin-left: 16rem') 
+      : 'margin-left: 0'"
+    >
+      <%- body %>
+    </main>
+
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>

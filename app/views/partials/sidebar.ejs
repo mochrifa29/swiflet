@@ -1,0 +1,175 @@
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const current = window.location.pathname;
+
+    document.querySelectorAll("[data-menu-active]").forEach((link) => {
+      if (link.getAttribute("href") === current) {
+        link.classList.add("bg-white/20", "text-white", "font-semibold");
+      }
+    });
+  });
+</script>
+
+<!-- Sidebar -->
+<aside
+  x-data="{ openMenu: null,current: window.location.pathname }"
+  class="fixed top-0 left-0 z-50 h-screen shadow-xl flex flex-col text-white transform transition-transform duration-300"
+  :class="[
+    collapsed ? 'w-20' : 'w-64',
+    mobileOpen ? 'translate-x-0' : '-translate-x-full',
+    'md:translate-x-0'  /* selalu tampil di desktop */
+  ]"
+  style="background: linear-gradient(180deg, #1e3a8a 0%, #172554 100%)"
+>
+  <!-- Header -->
+  <div
+    class="flex items-center justify-between px-4 h-16 border-b border-white/10"
+  >
+    <div class="flex flex-col">
+  <div class="flex items-center gap-2">
+    <i x-show="!collapsed" data-lucide="bird" class="w-8 h-8"></i>
+    <span x-show="!collapsed" class="font-bold text-xl tracking-wide">
+      Swiflet
+    </span>
+  </div>
+
+
+</div>
+
+
+    <!-- Desktop collapse -->
+    <button
+      @click="collapsed = !collapsed"
+      class="p-2 rounded hover:bg-white/10 hidden md:inline-flex"
+    >
+      <i data-lucide="menu" class="w-7 h-7"></i>
+    </button>
+
+    <!-- Mobile toggle -->
+    <button
+      @click="mobileOpen = !mobileOpen"
+      class="p-2 rounded hover:bg-white/10 md:hidden"
+    >
+      <i data-lucide="menu" class="w-7 h-7"></i>
+    </button>
+  </div>
+
+  <!-- Menu -->
+  <nav class="flex-1 overflow-y-auto p-3 space-y-1">
+
+     <div class="flex items-center mt-8 mb-6">
+      <span class="text-white font-semibold text-sm mr-3 whitespace-nowrap">
+        Dashboard
+      </span>
+      <div class="flex-grow h-px bg-gray-500/40"></div>
+    </div>
+
+
+
+    
+    <a
+      href="/dashboard"
+      :class="current === '/dashboard' ? 'bg-white/20 font-bold' : ''"
+      class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-white/10 transition"
+    >
+      <i data-lucide="home" class="w-5 h-5"></i>
+      <span x-show="!collapsed" class="font-medium">Dashboard</span>
+    </a>
+     
+  <!-- Master Data -->
+<div>
+  <!-- Button utama -->
+  <button
+    @click="openMenu = openMenu === 'master' ? 'master' : 'master'" 
+    :class="current.startsWith('/barang') || current.startsWith('/kategori') ? 'bg-white/20 font-bold' : 'hover:bg-white/10'"
+    class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-white transition-all duration-300"
+  >
+    <i data-lucide="database" class="w-5 h-5"></i>
+    <span x-show="!collapsed" class="font-medium">Master Data</span>
+    <i
+      data-lucide="chevron-down"
+      class="w-4 h-4 ml-auto transition-transform duration-300"
+      :class="openMenu === 'master' ? 'rotate-180' : ''"
+    ></i>
+  </button>
+
+  <!-- Submenu -->
+  <div 
+    x-show="openMenu === 'master'" 
+    x-collapse
+    class="overflow-hidden pl-6 mt-1 space-y-1 transition-all duration-300"
+  >
+    <a
+      href="/barang"
+      :class="current === '/barang' ? 'bg-white/20 font-bold text-white' : 'text-white/70 hover:text-white'"
+      class="block py-1 px-3 rounded-md transition-all duration-300 w-full"
+    >
+      <span class="inline-block w-full">Barang</span>
+    </a>
+   
+  </div>
+</div>
+
+
+
+
+    <div class="flex items-center mt-8 mb-6">
+      <span class="text-white font-semibold text-sm mr-3 whitespace-nowrap">
+        Users
+      </span>
+      <div class="flex-grow h-px bg-gray-500/40"></div>
+    </div>
+
+    <a
+      href="/user"
+      :class="current === '/user' ? 'bg-white/20 font-bold' : ''"
+      class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-white/10 transition"
+    >
+      <i data-lucide="user" class="w-5 h-5"></i>
+      <span x-show="!collapsed" class="font-medium">Users</span>
+    </a>
+
+    <div class="flex items-center mt-8 mb-6">
+      <span class="text-white font-semibold text-sm mr-3 whitespace-nowrap">
+        Barang
+      </span>
+      <div class="flex-grow h-px bg-gray-500/40"></div>
+    </div>
+
+    <a
+      href="/stok"
+      :class="current === '/stok' ? 'bg-white/20 font-bold' : ''"
+      class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-white/10 transition"
+    >
+      <i data-lucide="file" class="w-5 h-5"></i>
+      <span x-show="!collapsed" class="font-medium">Stock Barang</span>
+    </a>
+
+  
+    <a
+      href="/transaksi"
+      :class="current === '/transaksi' ? 'bg-white/20 font-bold' : ''"
+      class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-white/10 transition"
+    >
+      <i data-lucide="handshake" class="w-5 h-5"></i>
+      <span x-show="!collapsed" class="font-medium">Transaction</span>
+    </a>
+  </nav>
+
+ <div class="p-4 border-t border-white/10">
+  
+  <!-- Tombol Logout -->
+  <a
+    href="/logout"
+    class="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-white/10 transition"
+  >
+    <i data-lucide="log-out" class="w-5 h-5"></i>
+    <span x-show="!collapsed">Logout</span>
+  </a>
+</div>
+
+
+  <script>
+    lucide.createIcons();
+  </script>
+</aside>
