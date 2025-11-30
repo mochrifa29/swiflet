@@ -33,6 +33,7 @@ export const dashboard = async (req, res) => {
     totalBarang,
     total_A,
     total_B,
-    total_C
+    total_C,
+    user: req.user
   });
 };

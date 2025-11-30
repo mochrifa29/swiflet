@@ -1,4 +1,6 @@
+import jwt from "jsonwebtoken"
 import User from "../models/User.js";
+import bcrypt from "bcrypt"
 
 export const loginPage = (req, res) => {
   res.render("pages/auth/login/index", {
@@ -19,73 +21,56 @@ export const registerPage = (req, res) => {
   });
 };
 
-export const auth = async (req, res) => {
+export const processLogin = async (req, res) => {
   const { email, password } = req.body;
-  const errors = {};
 
-  if (!email) errors.email = "Email wajib diisi";
-  if (!password) errors.password = "Password wajib diisi";
-
-  if (Object.keys(errors).length > 0) {
+  // Cari user
+  const user = await User.findOne({ email });
+  if (!user) {
     return res.render("pages/auth/login/index", {
       title: "Login",
       layout: "layouts/auth",
-      errors,
-      oldData: req.body,
-      success: null,
+      errors: { email: "Email tidak ditemukan" },
+      oldData: { email }
     });
   }
 
-  try {
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      errors.general = "Email tidak terdaftar";
-      return res.render("pages/auth/login/index", {
-        title: "Login",
-        layout: "layouts/auth",
-        errors,
-        oldData: req.body,
-        success: null,
-      });
-    }
-
-    if (password !== user.password) {
-      errors.general = "Password salah";
-      return res.render("pages/auth/login/index", {
-        title: "Login",
-        layout: "layouts/auth",
-        errors,
-        oldData: req.body,
-        success: null,
-      });
-    }
-
-    // ============================
-    //      SET EXPRESS SESSION
-    // ============================
-    req.session.userId = user._id;
-    req.session.userName = user.name;
-    req.session.role = user.role;
-
-
-    req.session.save(() => {
-        res.redirect("/dashboard");
-    });
-  } catch (err) {
+  // Cek password
+  const match = await user.comparePassword(password);
+  if (!match) {
     return res.render("pages/auth/login/index", {
       title: "Login",
       layout: "layouts/auth",
-      errors: { general: "Terjadi kesalahan, coba lagi." },
-      oldData: req.body,
-      success: null,
+      errors: { password: "Password salah" },
+      oldData: { email }
     });
   }
+
+  // Buat token
+  const token = jwt.sign(
+    { id: user._id, name: user.name, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" }
+  );
+
+  // Simpan token ke cookie
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: true,      // ganti false saat localhost
+    sameSite: "lax"
+  });
+
+  res.redirect("/dashboard");
 };
 
 export const RegisterStore = async (req, res) => {
   try {
-    await User.create(req.body);
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    await User.create({
+      name: req.body.name,
+      email: req.body.email,
+      password: hashedPassword,
+    });
 
     return res.render("pages/auth/login/index", {
       title: "Login",
@@ -124,8 +109,7 @@ export const RegisterStore = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/login");
-  });
+   res.clearCookie("token");
+   res.redirect("/login");
 };
 
