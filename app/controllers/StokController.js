@@ -107,7 +107,9 @@ export const detail = async (req, res) => {
     res.render("pages/stok/detail", {
       layout: "layouts/main",
       error: req.query.error,
-      stok
+      stok,
+      SUPABASE_URL: process.env.SUPABASE_URL,
+      SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY
     });
 
   } catch (error) {
@@ -116,23 +118,23 @@ export const detail = async (req, res) => {
   }
 };
 
-export const uploadVideo = async (req,res) => {
-    
-    try {
-    const id = req.params.id;
+export const uploadVideo = async (req, res) => {
+  try {
     const { video_url, video_path } = req.body;
+    const id = req.params.id;
 
     await Stok.findByIdAndUpdate(id, {
       video_url,
       video_path
     });
 
-    res.json({ success: true });
+    res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);
-    res.json({ success: false, message: "Error saving video URL" });
+    res.status(400).json({ error: "Gagal menyimpan URL video" });
   }
-}
+};
+
 
 // Hapus video dari Supabase + database
 export const deleteVideo = async (req, res) => {

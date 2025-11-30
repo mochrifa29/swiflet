@@ -50,7 +50,8 @@ router.get("/stok/delete/:id",auth,StokController.deleteStok );
 router.post("/stok/update/:id",auth,StokController.update);
 router.patch("/stok/ready/:id",auth,StokController.updateReady);
 router.get("/stok/detail/:id",auth,StokController.detail);
-router.post("/stok/upload-video/:id",auth,upload.single("video"),StokController.uploadVideo);
+router.post("/stok/upload-video/:id",auth,StokController.uploadVideo);
+
 // Hapus video
 router.post("/stok/delete-video/:id",auth,StokController.deleteVideo);
 

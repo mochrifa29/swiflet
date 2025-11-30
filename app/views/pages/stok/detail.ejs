@@ -8,187 +8,231 @@
   </a>
 
   <!-- Wrapper 2 kolom -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
 
-  <!-- ======================================= -->
-  <!-- Card Detail -->
-  <!-- ======================================= -->
-  <div class="bg-white shadow-md rounded-xl p-6 border border-gray-200 h-full flex flex-col">
+      <!-- ======================================= -->
+      <!-- Card Detail -->
+      <!-- ======================================= -->
+      <div class="bg-white shadow-md rounded-xl p-6 border border-gray-200 h-full flex flex-col">
 
-    <h1 class="text-2xl font-semibold mb-5 text-gray-800">Detail Stok Barang</h1>
+        <h1 class="text-2xl font-semibold mb-5 text-gray-800">Detail Stok Barang</h1>
 
-    <div class="space-y-4 text-sm flex-1 mt-3">
+        <div class="space-y-2 text-sm flex-1 mt-3">
 
-      <!-- Nama Barang -->
-      <div class="flex justify-between">
-        <span class="text-gray-600">Nama Barang:</span>
-        <span class="font-semibold text-gray-800"><%= stok.barang.nama_barang %></span>
+          <!-- Nama Barang -->
+          <div class="flex justify-between">
+            <span class="text-gray-600">Nama Barang:</span>
+            <span class="font-semibold text-gray-800"><%= stok.barang.nama_barang %></span>
+          </div>
+
+          <!-- Grade -->
+          <div class="flex justify-between">
+            <span class="text-gray-600">Grade:</span>
+            <span class="font-semibold text-gray-800"><%= stok.barang.grade %></span>
+          </div>
+
+          <!-- Berat -->
+          <div class="flex justify-between">
+            <span class="text-gray-600">Berat:</span>
+            <span class="font-semibold text-gray-800"><%= stok.berat %> gram</span>
+          </div>
+
+          <!-- Ready -->
+          <div class="flex justify-between items-center">
+            <span class="text-gray-600">Status Ready:</span>
+
+            <% if (stok.ready) { %>
+              <span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold">
+                READY
+              </span>
+            <% } else { %>
+              <span class="px-3 py-1 rounded-full bg-red-200 text-red-800 text-xs font-bold">
+                NOT READY
+              </span>
+            <% } %>
+
+          </div>
+
+          <!-- Tanggal Input -->
+          <div class="flex justify-between">
+            <span class="text-gray-600">Tanggal Input:</span>
+            <span class="font-semibold text-gray-800">
+              <%= stok.createdAt.toLocaleDateString("id-ID", {
+                day:"numeric", month:"long", year:"numeric"
+              }) %>
+            </span>
+          </div>
+
+        </div>
+        
+        <div x-data="uploadVideo" class="space-y-3">
+
+  <div>
+    <label class="block font-medium text-gray-700 mb-1">Pilih Video</label>
+    <input type="file" accept="video/mp4"
+           @change="file = $event.target.files[0]"
+           class="w-full border border-gray-300 p-2 rounded-lg">
+  </div>
+
+  <!-- Progress Bar -->
+  <template x-if="uploading">
+    <div class="w-full bg-gray-200 h-3 rounded-lg overflow-hidden">
+      <div class="bg-blue-600 h-3"
+           :style="`width: ${progress}%`"></div>
+    </div>
+  </template>
+
+  <button @click="upload" 
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow flex items-center gap-2"
+        :class="uploading ? 'opacity-70 cursor-not-allowed' : ''"
+        :disabled="uploading">
+
+    <svg x-show="uploading"
+         class="w-5 h-5 animate-spin text-white"
+         fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" 
+              stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+    </svg>
+
+    <span x-show="!uploading">Upload</span>
+    <span x-show="uploading">Mengupload...</span>
+</button>
+
+
+  <div x-text="message" class="text-sm font-semibold mt-2"></div>
+
+</div>
+
+
       </div>
 
-      <!-- Grade -->
-      <div class="flex justify-between">
-        <span class="text-gray-600">Grade:</span>
-        <span class="font-semibold text-gray-800"><%= stok.barang.grade %></span>
-      </div>
 
-      <!-- Berat -->
-      <div class="flex justify-between">
-        <span class="text-gray-600">Berat:</span>
-        <span class="font-semibold text-gray-800"><%= stok.berat %> gram</span>
-      </div>
+      <!-- ======================================= -->
+      <!-- Card Video -->
+      <!-- ======================================= -->
+      <div class="bg-white shadow-md rounded-xl p-6 border border-gray-200 h-full flex flex-col">
 
-      <!-- Ready -->
-      <div class="flex justify-between items-center">
-        <span class="text-gray-600">Status Ready:</span>
-
-        <% if (stok.ready) { %>
-          <span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold">
-            READY
-          </span>
-        <% } else { %>
-          <span class="px-3 py-1 rounded-full bg-red-200 text-red-800 text-xs font-bold">
-            NOT READY
-          </span>
+        <% if (typeof error !== "undefined" && error) { %>
+          <div class="mb-4 mt-2 p-3 rounded text-sm font-semibold" 
+              style="background-color:#fee2e2; color:#b91c1c;">
+            <%= error %>
+          </div>
+        <% } else if (typeof success !== "undefined" && success) { %>
+          <div class="mb-4 mt-2 p-3 rounded text-sm font-semibold" 
+              style="background-color:#d1fae5; color:#065f46;">
+            <%= success %>
+          </div>
         <% } %>
 
+
+        <!-- Header: Judul + Tombol Hapus -->
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-xl font-semibold text-gray-800">Video Barang</h2>
+
+        <% if (stok.video_url && stok.video_url !== "") { %>
+          <form action="/stok/delete-video/<%= stok._id %>" method="POST" 
+                onsubmit="return confirm('Yakin ingin menghapus video ini?')">
+            <button type="submit"
+                    class="flex items-center gap-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+              Hapus
+            </button>
+          </form>
+        <% } %>
       </div>
 
-      <!-- Tanggal Input -->
-      <div class="flex justify-between">
-        <span class="text-gray-600">Tanggal Input:</span>
-        <span class="font-semibold text-gray-800">
-          <%= stok.createdAt.toLocaleDateString("id-ID", {
-            day:"numeric", month:"long", year:"numeric"
-          }) %>
-        </span>
+        <div class="flex-1 flex items-center justify-center mt-5">
+          <% if (stok.video_url && stok.video_url !== "") { %>
+
+            <div class="w-64 h-80 mx-auto bg-black rounded-lg overflow-hidden flex items-center justify-center">
+              <video controls class="w-full h-full object-contain">
+                <source src="<%= stok.video_url %>" type="video/mp4">
+              </video>
+            </div>
+
+            
+
+          <% } else { %>
+
+            <!-- Jika tidak ada video -->
+            <div class="text-center text-gray-500 italic">
+              Tidak ada video untuk barang ini.
+            </div>
+
+          <% } %>
+        </div>
+
       </div>
 
     </div>
-    <div class="mt-3">
-        <form id="uploadForm" class="space-y-4">
-
-              <div>
-                <label class="block text-gray-700 font-medium mb-1">Pilih Video</label>
-                <input type="file" id="videoInput" accept="video/mp4"
-                      class="block w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-200" required>
-              </div>
-
-              <button type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow">
-                Upload
-              </button>
-        </form>
-
-        <!-- error message -->
-        <div id="msg"></div>
-
-        </div>
-  </div>
-
-
-  <!-- ======================================= -->
-  <!-- Card Video -->
-  <!-- ======================================= -->
-  <div class="bg-white shadow-md rounded-xl p-6 border border-gray-200 h-full flex flex-col">
-
-    <% if (typeof error !== "undefined" && error) { %>
-      <div class="mb-4 mt-2 p-3 rounded text-sm font-semibold" 
-          style="background-color:#fee2e2; color:#b91c1c;">
-        <%= error %>
-      </div>
-    <% } else if (typeof success !== "undefined" && success) { %>
-      <div class="mb-4 mt-2 p-3 rounded text-sm font-semibold" 
-          style="background-color:#d1fae5; color:#065f46;">
-        <%= success %>
-      </div>
-    <% } %>
-
-
-     <!-- Header: Judul + Tombol Hapus -->
-  <div class="flex items-center justify-between mb-5">
-    <h2 class="text-xl font-semibold text-gray-800">Video Barang</h2>
-
-    <% if (stok.video_url && stok.video_url !== "") { %>
-      <form action="/stok/delete-video/<%= stok._id %>" method="POST" 
-            onsubmit="return confirm('Yakin ingin menghapus video ini?')">
-        <button type="submit"
-                class="flex items-center gap-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition">
-          <i data-lucide="trash-2" class="w-4 h-4"></i>
-          Hapus
-        </button>
-      </form>
-    <% } %>
-  </div>
-
-    <div class="flex-1 flex items-center justify-center mt-5">
-      <% if (stok.video_url && stok.video_url !== "") { %>
-
-        <div class="w-64 h-80 mx-auto bg-black rounded-lg overflow-hidden flex items-center justify-center">
-          <video controls class="w-full h-full object-contain">
-            <source src="<%= stok.video_url %>" type="video/mp4">
-          </video>
-        </div>
-
-         
-
-      <% } else { %>
-
-        <!-- Jika tidak ada video -->
-        <div class="text-center text-gray-500 italic">
-          Tidak ada video untuk barang ini.
-        </div>
-
-      <% } %>
-    </div>
-
-  </div>
 
 </div>
-
-</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
   lucide.createIcons();
 
-  // Supabase client
-  const supabase = window.supabase.createClient(
-    "<%= process.env.SUPABASE_URL %>",
-    "<%= process.env.SUPABASE_ANON_KEY %>"
-  );
+  document.addEventListener("alpine:init", () => {
+    Alpine.data("uploadVideo", () => ({
+      file: null,
+      progress: 0,
+      uploading: false,
+      message: "",
 
-  document.getElementById("uploadForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+      async upload() {
+        if (!this.file) {
+          this.message = "Pilih video terlebih dahulu.";
+          return;
+        }
 
-    const file = document.getElementById("videoInput").files[0];
-    if (!file) return;
+        this.uploading = true;
+        this.message = "";
+        this.progress = 0;
 
-    const fileName = Date.now() + "-" + file.name;
+        const supabase = window.supabase.createClient(
+            "<%= SUPABASE_URL %>",
+            "<%= SUPABASE_ANON_KEY %>"
+        );
 
-    // Upload ke Supabase langsung dari browser
-    const { data, error } = await supabase.storage
-      .from("videos")
-      .upload("stok/" + fileName, file);
+        const fileName = Date.now() + "-" + this.file.name;
+        const filePath = "stok/" + fileName;
 
-    if (error) {
-      document.getElementById("msg").innerHTML =
-        `<div class="p-3 mt-2 rounded text-sm" style="background:#fee2e2;color:#b91c1c">${error.message}</div>`;
-      return;
-    }
+        // Upload dengan progress listener
+        const { data, error } = await supabase.storage
+          .from("videos")
+          .upload(filePath, this.file, {
+            upsert: false,
+            onUploadProgress: (ev) => {
+              this.progress = Math.round((ev.loaded / ev.total) * 100);
+            },
+          });
 
-    // Ambil public URL
-    const { data: urlData } = await supabase.storage
-      .from("videos")
-      .getPublicUrl("stok/" + fileName);
+        if (error) {
+          this.message = "Upload gagal: " + error.message;
+          this.uploading = false;
+          return;
+        }
 
-    // Kirim URL ke backend
-    await fetch("/stok/upload-video/<%= stok._id %>", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ video_url: urlData.publicUrl, video_path: "stok/" + fileName }),
-    });
+        // Ambil public URL
+        const { data: urlData } = supabase.storage
+          .from("videos")
+          .getPublicUrl(filePath);
 
-    window.location.href = "/stok/detail/<%= stok._id %>";
+        // Kirim ke backend
+        await fetch("/stok/upload-video/<%= stok._id %>", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            video_url: urlData.publicUrl,
+            video_path: filePath
+          })
+        });
+
+        window.location.reload();
+      }
+    }));
   });
 </script>
+
