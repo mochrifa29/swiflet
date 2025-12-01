@@ -48,21 +48,21 @@
             >
               <td class="p-3"><%= i + 1 %></td>
 
-              <!-- Klik nama → buka modal -->
               <td class="p-3">
-                <span 
-                  class="cursor-pointer text-black hover:underline"
-                  x-text="nama"
+                <button 
                   @click="$dispatch('edit', { id, nama, grade })"
-                ></span>
+                  class="hover:underline cursor-pointer"
+                  x-text="nama"
+                ></button>
               </td>
 
-              <!-- Grade juga bisa diklik -->
-              <td class="p-3 cursor-pointer hover:underline"
+              <td class="p-3">
+                <button 
+                  @click="$dispatch('edit', { id, nama, grade })"
+                  class="hover:underline cursor-pointer"
                   x-text="grade"
-                  @click="$dispatch('edit', { id, nama, grade })">
+                ></button>
               </td>
-
               <td class="p-3">
                 <a href="/barang/detail/<%= b._id %>">
                   <% if (b.foto) { %>
