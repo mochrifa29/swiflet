@@ -74,13 +74,7 @@
            class="w-full border border-gray-300 p-2 rounded-lg">
   </div>
 
-  <!-- Progress Bar -->
-  <template x-if="uploading">
-    <div class="w-full bg-gray-200 h-3 rounded-lg overflow-hidden">
-      <div class="bg-blue-600 h-3"
-           :style="`width: ${progress}%`"></div>
-    </div>
-  </template>
+ 
 
   <button @click="upload" 
         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow flex items-center gap-2"
@@ -177,7 +171,6 @@
   document.addEventListener("alpine:init", () => {
     Alpine.data("uploadVideo", () => ({
       file: null,
-      progress: 0,
       uploading: false,
       message: "",
 
@@ -204,9 +197,6 @@
           .from("videos")
           .upload(filePath, this.file, {
             upsert: false,
-            onUploadProgress: (ev) => {
-              this.progress = Math.round((ev.loaded / ev.total) * 100);
-            },
           });
 
         if (error) {
