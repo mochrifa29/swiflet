@@ -1,4 +1,4 @@
-<div x-data="{ openAdd:false, openEdit:false, openDelete:false }" class="p-6">
+<div class="p-6">
   <!-- Tombol Tambah -->
   <div class="flex justify-between items-center mt-6">
     <h1 class="text-2xl font-semibold"><%= title %></h1>
@@ -32,72 +32,58 @@
           </tr>
         <% } else { %>
         <% barang.forEach((b, i) => { %>
-          <tr class="border-b hover:bg-gray-50" x-data="inlineEditBarang('<%= b._id %>', '<%= b.nama_barang %>', <%= b.harga %>)">
-            <td class="p-3"><%= i + 1 %></td>
-            <td class="p-3">
-              <template x-if="!editingNama">
-                <span @click="editingNama = true" class="cursor-pointer" x-text="nama"></span>
-              </template>
-              <template x-if="editingNama">
-                  <div class="flex items-center gap-2">
-                    <!-- Input -->
-                    <input 
-                      x-model="nama" 
-                      class="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
-                      placeholder="Nama Barang"
-                    />
+          <tr 
+            class="border-b hover:bg-gray-50" 
+            x-data="{ 
+              id: '<%= b._id %>', 
+              nama: '<%= b.nama_barang %>',
+              grade: '<%= b.grade %>' 
+            }"
+            @barang-terupdate.window="
+              if ($event.detail.id === id) {
+                nama = $event.detail.nama;
+                grade = $event.detail.grade;
+              }
+              "
+            >
+              <td class="p-3"><%= i + 1 %></td>
 
-                    <!-- Tombol Simpan -->
-                    <button 
-                      @click="save('nama')" 
-                      class="inline-flex items-center px-3 py-1 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition"
-                    >
-                      Simpan
-                    </button>
+              <!-- Klik nama → buka modal -->
+              <td class="p-3">
+                <span 
+                  class="cursor-pointer text-black hover:underline"
+                  x-text="nama"
+                  @click="$dispatch('edit', { id, nama, grade })"
+                ></span>
+              </td>
 
-                    <!-- Tombol Batal -->
-                    <button 
-                      @click="cancel('nama')" 
-                      class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition"
-                    >
-                      Batal
-                    </button>
-                  </div>
-              </template>
+              <!-- Grade juga bisa diklik -->
+              <td class="p-3 cursor-pointer hover:underline"
+                  x-text="grade"
+                  @click="$dispatch('edit', { id, nama, grade })">
+              </td>
 
-            </td>
-            <td class="p-3">
-              <%= b.grade %>
-            </td>
-            <td class="p-3">
-               <a href="/barang/detail/<%= b._id %>">
+              <td class="p-3">
+                <a href="/barang/detail/<%= b._id %>">
                   <% if (b.foto) { %>
-                    <img 
-                    src="<%= b.foto %>" 
-                    alt="Foto <%= b.nama_barang %>" 
-                    class="w-16 h-16 object-cover rounded-md"
-                  
-                    "/>
+                    <img src="<%= b.foto %>" class="w-16 h-16 object-cover rounded-md" />
                   <% } else { %>
-                    <span class="text-gray-400 text-sm">Tidak ada foto</span>
+                    <span class="text-gray-400">Tidak ada foto</span>
                   <% } %>
-               </a>
-            </td>
-            <td class="p-3">
-              <div class="flex items-center justify-center gap-3">
-               
+                </a>
+              </td>
 
-                <!-- Delete -->
+              <td class="p-3 text-center">
                 <a
-                  href="/barang/delete/<%= b._id %>" 
-                   onclick="return confirm('Apakah anda yakin ingin menghapus barang ini?');"
+                  href="/barang/delete/<%= b._id %>"
+                  onclick="return confirm('Yakin hapus?');"
                   class="text-red-600 hover:text-red-800"
                 >
                   <svg data-lucide="trash" class="w-5 h-5"></svg>
                 </a>
-              </div>
-            </td>
+              </td>
           </tr>
+
          <% }) %>
 
         <% } %>
@@ -105,53 +91,107 @@
     </table>
   </div>
 
-  
-
-
-
-
 </div>
-  
+
+
+<!-- modal -->
+ <!-- Modal -->
+<div 
+  id="modalEditNama"
+  x-data="editNamaModal()" 
+  x-show="open"
+  @edit.window="show($event.detail.id, $event.detail.nama, $event.detail.grade)"
+  x-transition.opacity
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+>
+  <div class="bg-white p-6 rounded-lg w-96 shadow-lg" @click.outside="close()">
+
+    <h2 class="text-xl font-semibold mb-3">Edit Barang</h2>
+
+    <!-- Nama -->
+    <label class="text-sm text-gray-600">Nama Barang</label>
+    <input
+      x-model="nama"
+      class="w-full border border-gray-300 rounded-md px-3 py-2 mb-4"
+    />
+
+    <!-- Grade -->
+    <label class="text-sm text-gray-600">Grade</label>
+    <input
+      x-model="grade"
+      class="w-full border border-gray-300 rounded-md px-3 py-2"
+    />
+
+    <div class="flex justify-end mt-4 gap-2">
+      <button @click="close()" class="px-4 py-2 bg-gray-200 rounded-md">
+        Tutup
+      </button>
+      
+      <button 
+        @click="save()" 
+        class="px-4 py-2 bg-blue-600 text-white rounded-md"
+      >
+        Simpan
+      </button>
+    </div>
+
+  </div>
 </div>
 
 
 
 <script>
-function inlineEditBarang(id, namaInit, hargaInit) {
+function editNamaModal() {
   return {
-    nama: namaInit,
-    editingNama: false,
-    originalNama: namaInit,
-    save(field) {
-      // Siapkan data
-      const data = {};
-      if (field === 'nama') data.nama_barang = this.nama;
+    open: false,
+    id: null,
+    nama: "",
+    grade: "",
 
-      fetch(`/barang/update/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          if (field === 'nama') {
-            this.originalNama = this.nama;
-            this.editingNama = false;
-          }
-        } else {
-          alert(result.message);
-        }
-      })
-      .catch(err => alert('Error: ' + err));
+    show(id, nama, grade) {
+      this.id = id;
+      this.nama = nama;
+      this.grade = grade;
+      this.open = true;
     },
-    cancel(field) {
-      if (field === 'nama') this.nama = this.originalNama; this.editingNama = false;
-      
+
+    close() {
+      this.open = false;
+    },
+
+    async save() {
+      const body = {
+        nama_barang: this.nama,
+        grade: this.grade
+      };
+
+      await fetch(`/barang/update/${this.id}`, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      // Update tampilan tabel tanpa reload
+      window.dispatchEvent(
+        new CustomEvent("barang-terupdate", {
+          detail: { id: this.id, nama: this.nama, grade: this.grade }
+        })
+      );
+
+      this.close();
     }
-  }
+  };
 }
 </script>
+
+
+
+
+
+
+
+
+
 
 
 
