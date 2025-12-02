@@ -94,10 +94,10 @@
 </div>
 
 
-<!-- modal -->
+
  <!-- Modal -->
 <div 
-  x-data="editNamaModal()" 
+  x-data="editModal()" 
   x-show="open"
   @edit.window="show($event.detail.id, $event.detail.nama, $event.detail.grade)"
   x-transition.opacity
@@ -140,7 +140,7 @@
 
 
 <script>
-function editNamaModal() {
+function editModal() {
   return {
     open: false,
     id: null,

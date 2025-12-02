@@ -23,45 +23,65 @@ export const registerPage = (req, res) => {
 
 export const processLogin = async (req, res) => {
   const { email, password } = req.body;
+  const errors = [];
 
-  // Cari user
+  // 1️⃣ Validasi manual dulu (tidak boleh kosong)
+  if (!email || email.trim() === "") {
+    errors.push("Email tidak boleh kosong");
+  }
+  if (!password || password.trim() === "") {
+    errors.push("Password tidak boleh kosong");
+  }
+
+  if (errors.length > 0) {
+    return res.render("pages/auth/login/index", {
+      title: "Login",
+      layout: "layouts/auth",
+      errors,
+      oldData: { email },
+    });
+  }
+
+  // 2️⃣ Cari user
   const user = await User.findOne({ email });
   if (!user) {
     return res.render("pages/auth/login/index", {
       title: "Login",
       layout: "layouts/auth",
-      errors: { email: "Email tidak ditemukan" },
-      oldData: { email }
+      errors: ["Email tidak ditemukan"],
+      oldData: { email },
     });
   }
 
-  // Cek password
+  // 3️⃣ Cek password
   const match = await user.comparePassword(password);
   if (!match) {
     return res.render("pages/auth/login/index", {
       title: "Login",
       layout: "layouts/auth",
-      errors: { password: "Password salah" },
-      oldData: { email }
+      errors: ["Password salah"],
+      oldData: { email },
     });
   }
 
-  // Buat token
+  // 4️⃣ Buat token
   const token = jwt.sign(
     { id: user._id, name: user.name, role: user.role },
     process.env.JWT_SECRET,
     { expiresIn: "1d" }
   );
 
-  // Simpan token ke cookie
+  // 5️⃣ Simpan token ke cookie
   res.cookie("token", token, {
     httpOnly: true,
-    secure: true,      // ganti false saat localhost
-    sameSite: "lax"
+    secure: false,   // ubah ke true jika deploy https
+    sameSite: "lax",
   });
 
   res.redirect("/dashboard");
 };
+
+
 
 export const RegisterStore = async (req, res) => {
   try {

@@ -1,5 +1,5 @@
 import User from "../models/User.js";
-
+import bcrypt from "bcrypt";
 
 export const index = async (req, res) => {
   try {
@@ -91,6 +91,77 @@ export const store = async (req, res) => {
   // }
 };
 
-export default{index,create,store}
+export const update = async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    const userId = req.params.id;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: "User tidak ditemukan"
+      });
+    }
+
+    // Set data tapi belum save
+    user.name = name;
+    user.email = email;
+    user.role = role;
+
+    if (password && password.trim() !== "") {
+      user.password = password; // biarkan mongoose validasi
+    }
+
+    // Validasi mongoose
+    await user.validate();
+
+    // Hash password jika diisi
+    if (password && password.trim() !== "") {
+      user.password = await bcrypt.hash(password, 10);
+    }
+
+    await user.save();
+
+    return res.json({
+      status: true,
+      message: "User berhasil diperbarui",
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+
+  } catch (err) {
+    console.log(err);
+
+    // Jika error validasi mongoose
+    if (err.name === "ValidationError") {
+      const errors = {};
+      for (let field in err.errors) {
+        errors[field] = err.errors[field].message;
+      }
+
+      return res.status(400).json({
+        status: false,
+        message: "Validasi gagal",
+        errors
+      });
+    }
+
+    return res.status(500).json({
+      status: false,
+      message: "Terjadi kesalahan server"
+    });
+  }
+};
+
+
+
+
+export default{index,create,store,update}
 
 

@@ -81,19 +81,63 @@ export const deleteStok = async (req,res) => {
     }
 }
 
-export const update = async (req, res) => {
 
-    try {
-        const { id } = req.params;
-        const { berat } = req.body;
-         // update berat stok
-        await Stok.findByIdAndUpdate(id, { berat: Number(berat) });
-        res.json({ success: true, message: "Berat berhasil diperbarui" });
-    } catch (error) {
-      
+export const update = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { berat } = req.body;
+
+    const stok = await Stok.findById(id);
+    if (!stok) {
+      return res.status(404).json({
+        status: false,
+        message: "Data stok tidak ditemukan"
+      });
     }
 
-}
+    // =========================
+    // VALIDASI MANUAL BERAT
+    // =========================
+    if (!berat || berat === "") {
+      return res.status(400).json({
+        status: false,
+        errors: {
+          berat: "Berat wajib diisi"
+        }
+      });
+    }
+
+    stok.berat = berat;
+
+    // simpan dan tangkap error mongoose
+    await stok.save();
+
+    return res.json({
+      status: true,
+      message: "Berhasil mengupdate stok"
+    });
+
+  } catch (err) {
+    // menangkap error mongoose
+    if (err.name === "ValidationError") {
+      const errors = {};
+      for (let field in err.errors) {
+        errors[field] = err.errors[field].message;
+      }
+
+      return res.status(400).json({
+        status: false,
+        errors
+      });
+    }
+
+    return res.status(500).json({
+      status: false,
+      message: "Terjadi kesalahan server"
+    });
+  }
+};
+
 
 export const detail = async (req, res) => {
   try {

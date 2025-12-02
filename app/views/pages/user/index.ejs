@@ -35,9 +35,29 @@
 
               <% users.forEach((u, i) => { %>
 
-                  <tr class="border-b hover:bg-gray-50">
+                  <tr class="border-b hover:bg-gray-50"  x-data="{ 
+                      id: '<%= u._id %>', 
+                      name: '<%= u.name %>',
+                      email: '<%= u.email %>', 
+                      password: '', 
+                      role: '<%= u.role %>' 
+                    }"
+                    @user-terupdate.window="
+                      if ($event.detail.id === id) {
+                        name = $event.detail.name;
+                        email = $event.detail.email;
+                        password = $event.detail.password;
+                        role = $event.detail.role;
+                      }
+                      ">
                     <td class="p-3"><%= i + 1 %></td>
-                    <td class="p-3"><%= u.name %></td>
+                    <td class="p-3">
+                      <button 
+                        @click="$dispatch('edit', { id, name, email,role })"
+                        class="hover:underline cursor-pointer"
+                        x-text="name"
+                      ></button>
+                    </td>
                     <td class="p-3"><%= u.email %></td>
                     <td class="p-3">
                       <span class="px-2 py-1 rounded bg-green-100 text-green-700 text-xs">
@@ -46,14 +66,7 @@
                     </td>
                     <td class="p-3">
                       <div class="flex items-center justify-center gap-3">
-                        <!-- Edit -->
-                        <button
-                          @click="openEdit = true"
-                          class="text-blue-600 hover:text-blue-800"
-                        >
-                          <svg data-lucide="pencil" class="w-5 h-5"></svg>
-                        </button>
-
+                       
                         <!-- Delete -->
                         <button
                           @click="openDelete = true"
@@ -74,3 +87,144 @@
 
  
 </div>
+
+<!-- Modal -->
+<div 
+  x-data="editModal()" 
+  x-show="open"
+  @edit.window="show($event.detail.id,$event.detail.name, $event.detail.email,$event.detail.password,$event.detail.role)"
+  x-transition.opacity
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+>
+
+  
+  <div class="bg-white p-6 rounded-lg w-96 shadow-lg" @click.outside="close()">
+
+      <!-- Alert Error HARUS di sini -->
+    <template x-if="errorMessage">
+      <div class="bg-red-100 text-red-700 p-2 rounded mb-3 text-sm">
+        <span x-text="errorMessage"></span>
+      </div>
+    </template>
+
+    <h2 class="text-xl font-semibold mb-3">Edit User</h2>
+
+    <!-- Nama -->
+    <label class="text-sm text-gray-600">Username</label>
+    <input
+      x-model="name"
+      class="w-full border border-gray-300 rounded-md px-3 py-2 mb-4"
+    />
+
+    <!-- Email -->
+    <label class="text-sm text-gray-600">Email</label>
+    <input
+      x-model="email"
+      class="w-full border border-gray-300 rounded-md px-3 py-2"
+    />
+
+    <!-- Password -->
+    <label class="text-sm text-gray-600">Password</label>
+    <input
+      x-model="password"
+      placeholder="Kosongkan jika tidak ganti password"
+      class="w-full border border-gray-300 rounded-md px-3 py-2"
+    />
+
+     <!-- Role -->
+    <label class="text-sm text-gray-600">Role</label>
+        <select x-model="role" class="w-full border border-gray-300 rounded-md px-3 py-2">
+            <option value="">-- Pilih role --</option>
+
+            <option value="admin">
+              Admin
+            </option>
+
+            <option value="user" >
+              User
+            </option>
+        </select>
+
+
+    <div class="flex justify-end mt-4 gap-2">
+      <button @click="close()" class="px-4 py-2 bg-gray-200 rounded-md">
+        Tutup
+      </button>
+      
+      <button 
+        @click="save()" 
+        class="px-4 py-2 bg-blue-600 text-white rounded-md"
+      >
+        Simpan
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function editModal() {
+  return {
+    open: false,
+    id: null,
+    name: "",
+    email: "",
+    password: "",
+    role: "",
+    errorMessage:"",
+    successMessage: "",
+
+
+    show(id, name, email, password, role) {
+      this.id = id;
+      this.name = name;
+      this.email = email;
+      this.password = password;
+      this.role = role;
+      this.open = true;
+    },
+
+    close() {
+      this.open = false;
+    },
+
+    async save() {
+      this.errorMessage = "";
+      this.successMessage ="";
+
+      const body = {
+        name: this.name,
+        email: this.email,
+        password: this.password,
+        role: this.role,
+      };
+
+      const res = await fetch(`/user/update/${this.id}`, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        this.errorMessage = data.message || "Gagal menyimpan data";
+        return;
+      }
+
+       // jika sukses → tampilkan pesan sukses
+      this.successMessage = data.message;
+
+      // Update tampilan tabel tanpa reload
+      window.dispatchEvent(
+        new CustomEvent("user-terupdate", {
+          detail: data.data 
+        })
+      );
+
+      this.close();
+    }
+
+  };
+}
+</script>

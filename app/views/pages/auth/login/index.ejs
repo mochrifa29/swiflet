@@ -13,25 +13,16 @@
       <i data-lucide="bird" class="w-8 h-8 text-amber-400"></i>
     </div>
   </div>
- <!-- Pesan sukses register -->
-  <% if (success) { %>
-  <div class="bg-green-600 text-white px-4 py-3 rounded mb-4 flex items-center" role="alert">
-    <svg class="w-5 h-5 mr-2 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-    </svg>
-    <span><%= success %></span>
-  </div>
-<% } %>
-
-  <!-- Pesan error umum -->
-  <% if (errors.general) { %>
-  <div class="bg-red-600 text-white px-4 py-3 rounded mb-4 flex items-center" role="alert">
-    <svg class="w-5 h-5 mr-2 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-    </svg>
-    <span><%= errors.general %></span>
-  </div>
-<% } %>
+ 
+    <% if (errors && errors.length > 0) { %>
+      <div class="bg-red-500 text-white px-4 py-2 mb-4 rounded">
+        <ul class="list-disc list-inside">
+          <% errors.forEach(err => { %>
+            <li><%= err %></li>
+          <% }) %>
+        </ul>
+      </div>
+    <% } %>
 
 
   <!-- Form -->
@@ -49,9 +40,6 @@
         placeholder="you@example.com"
         class="w-full px-4 py-3 rounded-lg border border-white/30 bg-white/10 text-white placeholder-white/50 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition text-sm sm:text-base"
       />
-         <% if (errors.email) { %>
-        <small class="text-white"><%= errors.email %></small>
-      <% } %>
     </div>
 
     <!-- Password -->
@@ -68,9 +56,6 @@
         placeholder="••••••••"
         class="w-full px-4 py-3 rounded-lg border border-white/30 bg-white/10 text-white placeholder-white/50 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition text-sm sm:text-base"
       />
-       <% if (errors.password) { %>
-        <small class="text-white"><%= errors.password %></small>
-      <% } %>
     </div>
 
     <!-- Remember me + Forgot password -->

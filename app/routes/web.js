@@ -31,6 +31,8 @@ router.get("/user",auth,UserController.index);
     
 router.get("/user/create",auth,UserController.create);
 router.post("/user/store",auth,UserController.store);
+router.post('/user/update/:id',auth,UserController.update);
+
 
 
 // Barang

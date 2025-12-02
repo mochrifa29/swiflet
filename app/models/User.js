@@ -17,7 +17,7 @@ const userSchema = new Schema({
   password: {
     type: String,
     required: [true, "Password harus diisi"],
-    minlength: [6, "Password minimal 6 karakter"],
+    minlength: [3, "Password minimal 3 karakter"],
   },
   role: {
     type: String,
