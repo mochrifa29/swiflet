@@ -1,4 +1,4 @@
-import Barang from "../models/Barang.js";
+import Stok from "../models/Stok.js";
 import Transaksi from "../models/Transaksi.js";
 
 
@@ -16,33 +16,35 @@ export const index = async (req, res) => {
 
 export const create = async (req, res) => {
    // ambil semua barang dari database
-  const barangs = await Barang.find().sort({ nama_barang: 1 });
+  const stoks = await Stok.find().populate('barang');
   res.render("pages/transaksi/create", {
     title: "Form Transaction",
     layout: "layouts/main",
-    barangs
+    stoks
   });
 };
+
+      function generateInvoice() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+
+        // Ambil 4 digit terakhir dari timestamp
+        const shortTime = String(Date.now()).slice(-4);
+
+        // Hasil akhir
+        return `INV-${yyyy}${mm}${dd}-${shortTime}`;
+      }
+
 
 export const store = async (req, res) => {
    
     
        const data = req.body;
 
-       // Ambil tanggal sekarang
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, '0');
-      const dd = String(today.getDate()).padStart(2, '0');
-
-      // Ambil 4 digit terakhir timestamp
-      const shortTime = String(Date.now()).slice(-4);
-
-      // Buat kode invoice sederhana
-      const kodeInvoice = `INV-${yyyy}${mm}${dd}-${shortTime}`;
-
        await Transaksi.create({
-            invoice:kodeInvoice,
+            invoice:generateInvoice(),
             nama_pembeli: data.nama_pembeli,
             items: data.items,
             total_berat: data.total_berat,
@@ -52,17 +54,47 @@ export const store = async (req, res) => {
             keterangan : data.keterangan
        })
       res.json({ success: true })
-   
-
     
 };
+
+export const updateStok = async (req,res) => {
+  try {
+        const { id, berat } = req.body;
+
+        const stok = await Stok.findById(id);
+
+        if (!stok) {
+            return res.json({ success: false, message: "Stok tidak ditemukan" });
+        }
+
+        // Cek apakah cukup
+        if (stok.berat < berat) {
+            return res.json({ success: false, message: "Stok tidak cukup" });
+        }
+
+        // Kurangi
+        stok.berat -= berat;
+
+        await stok.save();
+
+        res.json({
+            success: true,
+            message: "Stok berhasil dikurangi",
+            data: stok
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.json({ success: false, message: "Terjadi kesalahan" });
+    }
+}
 
 export const detail = async(req,res) => {
    const id = req.params.id;
 
     try {
         // Ambil data transaksi dari database
-        const transaksi = await Transaksi.findById(id).populate('items'); 
+        const transaksi = await Transaksi.findById(id) 
         if (!transaksi) return res.status(404).send('Transaksi tidak ditemukan');
 
         res.render('pages/transaksi/detailTransaksi', { 
@@ -77,4 +109,4 @@ export const detail = async(req,res) => {
 }
 
 
-export default{index,create,store,detail}
+export default{index,create,store,detail,updateStok}

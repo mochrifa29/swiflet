@@ -14,9 +14,9 @@
               class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 bg-white"
             >
               <option value="">-- Pilih Barang --</option>
-              <% barangs.forEach(b => { %>
-                <option value="<%= b._id %>">
-                  <%= b.nama_barang %>
+              <% stoks.forEach(s => { %>
+                <option value="<%= s._id %>">
+                  <%= s.barang.nama_barang %>
                 </option>
               <% }) %>
             </select>
@@ -161,7 +161,7 @@
   </div>
  
 
-    <!-- Modal -->
+    <!-- Modal pembayaran -->
     <div 
       x-show="open"
       class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center px-4"
@@ -238,12 +238,13 @@
 
         <!-- Button -->
         <div class="flex justify-end gap-2">
-          <button 
+         <button 
             class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
-            @click="open = false"
+            @click="open = false; nama_pembeli=''; bayar=0; bayar_display=''; keterangan='';"
           >
             Batal
           </button>
+
 
           <button 
             class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
@@ -311,12 +312,7 @@
         <div class="flex justify-end gap-3 mt-6">
           <button 
             class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition"
-            @click="
-              open_success = false; 
-              nama_pembeli = '';
-              bayar = 0;
-              bayar_display = '';
-            "
+            @click="tutup()"
           >
             Tutup
           </button>
@@ -334,8 +330,7 @@
 
 </div>
 <script>
-
-window.barangs = <%- JSON.stringify(barangs) %>
+window.stoks = <%- JSON.stringify(stoks) %>
 function cartComponent() {
   return {
         barang: "",
@@ -344,161 +339,132 @@ function cartComponent() {
         harga_display:"",
         berat_display:"",
         items: [],
-        barangs : window.barangs,
+        stoks : window.stoks,
         open:false,
         nama_pembeli:"",
-        bayar: 0,            // nilai asli angka
-        bayar_display: "",   // tampilan input (50.000)
+        bayar: 0,
+        bayar_display: "",
         modal_total_harga: 0,
         modal_total_berat: 0,
         kembalian:0,
         keterangan:"",
         open_success: false,
-        errors: {
-                  berat: "",
-                  harga: "",
-                  barang: ""
-                },
+        errors: { berat: "", harga: "", barang: "" },
+
         formatGram() {
-            // buang semua karakter kecuali angka
             let raw = this.berat_display.replace(/\D/g, "");
-
-            // simpan angka asli
             this.berat = Number(raw);
-
-            // format ribuan (tanpa Rp)
             this.berat_display = this.berat.toLocaleString("id-ID");
         },
+
         formatRupiah() {
-            // buang semua karakter kecuali angka
             let raw = this.harga_display.replace(/\D/g, "");
-
-            // simpan angka asli
             this.harga = Number(raw);
-
-            // format ribuan (tanpa Rp)
             this.harga_display = this.harga.toLocaleString("id-ID");
         },
+
         formatBayar() {
-            // hapus semua char kecuali angka
             let raw = this.bayar_display.replace(/\D/g, "");
-
-            // simpan angka asli
             this.bayar = Number(raw);
-
-            // tampilkan dalam format rupiah (tanpa "Rp")
             this.bayar_display = this.bayar.toLocaleString("id-ID");
         },
+
         cleanNumber(value) {
             return Number(String(value).replace(/[^0-9]/g, ""));
         },
+
         init() {
-   
-            // load dari localStorage
             const saved = localStorage.getItem("keranjang_walet");
             if (saved) this.items = JSON.parse(saved);
 
-            // simpan otomatis kalau berubah
             this.$watch("items", val => {
                 localStorage.setItem("keranjang_walet", JSON.stringify(val));
             });
-
-          
         },
+
         validateInputs() {
-            // reset semua error
             this.errors.berat = "";
             this.errors.harga = "";
             this.errors.barang = "";
-            
             let hasError = false;
 
-            // Berat
-            if (!this.berat || Number(this.berat) === 0) {
+            if (!this.berat || this.berat === 0) {
                 this.errors.berat = "Berat belum diisi.";
                 hasError = true;
             }
 
-            // Harga
-            if (!this.harga || Number(this.harga) === 0) {
+            if (!this.harga || this.harga === 0) {
                 this.errors.harga = "Harga belum diisi.";
                 hasError = true;
             }
 
-            // Barang
-            const barang = this.barangs.find(b => b._id === this.barang);
-            if (!barang) {
+            const barangDipilih = this.stoks.find(s => s._id === this.barang);
+            if (!barangDipilih) {
                 this.errors.barang = "Barang belum dipilih.";
                 hasError = true;
             }
 
-            if (hasError) return false; // hentikan proses
-            return true;
+             // Validasi berat melebihi stok
+            if (this.berat > barangDipilih.berat) {   // <-- sesuaikan kunci datanya
+                this.errors.berat = `Berat melebihi stok! Stok tersedia: ${barangDipilih.berat} gram`;
+                hasError = true;
+            }
+
+            return !hasError;
         },
+
         addItem() {
+            if (!this.validateInputs()) return;
 
-          if (!this.validateInputs()) return;
-          // Ambil barang lengkap berdasarkan _id
-         const barang = this.barangs.find(b => b._id === this.barang);
-         const total = Math.round((this.berat / 1000) * (Number(this.harga) / 1000));
+            const stoks = this.stoks.find(s => s._id === this.barang);
 
-          this.items.push({
-            name: barang.nama_barang,
-            berat : this.berat,
-            harga : Number(this.harga),
-            sub_total: total
-          });
+            
+            const total = Math.round((this.berat / 1000) * (this.harga / 1000));
 
-          
-          
+            this.items.push({
+                id: stoks._id,
+                name: stoks.barang.nama_barang,
+                berat: this.berat,
+                harga: this.harga,
+                sub_total: total
+            });
 
-         // Reset field setelah dimasukkan
-          this.barang = "";     // reset select barang
-          this.berat_display = "";      // reset input berat
-          this.berat = 0;      // reset input berat
-          this.harga_display="";
-          this.harga=0;
-      
+            // Reset field
+            this.barang = "";
+            this.berat_display = "";
+            this.berat = 0;
+            this.harga_display = "";
+            this.harga = 0;
         },
-        checkout(){
-             
 
+        checkout() {
             if (this.items.length === 0) {
                 alert("Keranjang masih kosong!");
                 return;
             }
 
-            // buka modal
             this.open = true;
-
-            // siapkan data modal
             this.modal_total_harga = this.totalHarga();
             this.modal_total_berat = this.totalBerat();
-
         },
+
         prosesPembayaran() {
-            // Validasi nama pembeli
-            if (!this.nama_pembeli || this.nama_pembeli.trim() === "") {
+            if (!this.nama_pembeli || !this.nama_pembeli.trim()) {
                 alert("Nama pembeli wajib diisi!");
                 return;
             }
 
-            // Validasi keterangan
-            if (!this.keterangan || this.keterangan.trim() === "") {
+            if (!this.keterangan || !this.keterangan.trim()) {
                 alert("Keterangan wajib diisi!");
                 return;
             }
 
-            // Validasi bayar
             if (!this.bayar || this.bayar < this.modal_total_harga) {
                 alert("Uang bayar kurang!");
                 return;
             }
 
-
             this.kembalian = this.bayar - Math.round(this.modal_total_harga);
-
-           
 
             fetch("/transaksi/store", {
               method: "POST",
@@ -527,37 +493,43 @@ function cartComponent() {
             this.clearCart();
               }
             })
-
-           
-
-         
+        },
+        tutup(){
+          this.open_success = false; 
+          this.nama_pembeli = '';
+          this.bayar = 0;
+          this.bayar_display = '';
+          // Redirect ke halaman transaksi
+          window.location.href = "/transaksi";
         },
         removeItem(i) {
-          this.items.splice(i, 1);
+            this.items.splice(i, 1);
         },
+
         clearCart() {
-           this.items = [];
+            this.items = [];
             localStorage.removeItem("keranjang_walet");
         },
+
         totalHarga() {
-          return this.items.reduce((t, i) => t + ((i.berat / 1000) * (i.harga / 1000)), 0);
+            return this.items.reduce((t, i) => t + ((i.berat / 1000) * (i.harga / 1000)), 0);
         },
+
         totalBerat() {
-          return this.items.reduce((t, i) => t + Number(i.berat), 0);
+            return this.items.reduce((t, i) => t + Number(i.berat), 0);
         },
+
         rupiah(val) {
-          return new Intl.NumberFormat("id-ID", {
-            style: "currency",
-            currency: "IDR",
-            minimumFractionDigits: 0,
-          }).format(val);
+            return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(val);
         },
+
         formatBerat(val) {
-          return new Intl.NumberFormat("id-ID", { minimumFractionDigits: 0 }).format(val);
+            return new Intl.NumberFormat("id-ID", { minimumFractionDigits: 0 }).format(val);
         }
   }
 }
 </script>
+
 
 
 

@@ -64,5 +64,7 @@ router.get("/transaksi",auth,TransaksiController.index);
 router.get("/transaksi/create",auth,TransaksiController.create);
 router.post("/transaksi/store",auth,TransaksiController.store);
 router.get("/transaksi/detail/:id",auth,TransaksiController.detail)
+router.post("/transaksi/update-stok",auth,TransaksiController.updateStok);
+
 
 export default router;
