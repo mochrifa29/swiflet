@@ -45,7 +45,7 @@
                 <td class="p-3"><%= i + 1 %></td>
                 <td class="p-3"><%= t.invoice %></td>
                 <td class="p-3"><%= t.nama_pembeli %></td>
-                <td class="p-3"><%= Intl.NumberFormat('id-ID').format(t.total_berat) %> Gram</td>
+                <td class="p-3"><%= Intl.NumberFormat('id-ID').format(t.total_berat/1000) %> Kg</td>
                 <td class="p-3"><%= Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(t.total_belanja) %></td>
                 <td class="p-3"><%= t.keterangan %></td>
                 <td class="p-3" x-data="detailModal">
@@ -133,14 +133,31 @@
     <hr class="my-3 border-gray-300">
 
     <!-- Items -->
-    <div class="space-y-1">
+    <div class="space-y-2">
       <template x-for="i in data.items">
-        <div class="flex justify-between text-[12px]">
-          <span x-text="i.name"></span>
-          <span class="font-semibold" x-text="new Intl.NumberFormat('id-ID').format(i.sub_total)"></span>
+
+        <div class="text-[12px]">
+          <!-- Nama + Subtotal -->
+          <div class="flex justify-between">
+            <span x-text="i.name"></span>
+            <span class="font-semibold" x-text="new Intl.NumberFormat('id-ID').format(i.sub_total)"></span>
+          </div>
+
+       <!-- Detail kecil (harga × berat) -->
+        <div class="text-[10px] text-gray-500 mt-[-2px]">
+          <small>
+            <small x-text="new Intl.NumberFormat('id-ID').format(i.harga/1000)"></small>
+            ×
+            <small x-text="new Intl.NumberFormat('id-ID').format(i.berat/1000)"></small>
+          </small>
         </div>
+
+
+        </div>
+
       </template>
     </div>
+
 
     <hr class="my-3 border-gray-300">
 

@@ -30,7 +30,9 @@
     </div>
     <div class="flex justify-between">
       <span class="text-gray-500 font-medium">Total Berat</span>
-      <span class="font-semibold"><%= transaksi.total_berat.toLocaleString('id-ID') %> gram</span>
+      <span class="font-semibold">
+        <%= new Intl.NumberFormat('id-ID').format(transaksi.total_berat / 1000000) + ' Kg' %>
+      </span>
     </div>
     <div class="flex justify-between">
       <span class="text-gray-500 font-medium">Total Harga</span>
@@ -51,7 +53,7 @@
           <tr>
             <th class="px-4 py-2 text-left text-gray-600 font-medium">#</th>
             <th class="px-4 py-2 text-left text-gray-600 font-medium">Nama Barang</th>
-            <th class="px-4 py-2 text-left text-gray-600 font-medium">Berat (gram)</th>
+            <th class="px-4 py-2 text-left text-gray-600 font-medium">Berat (Kg)</th>
             <th class="px-4 py-2 text-left text-gray-600 font-medium">Harga</th>
             <th class="px-4 py-2 text-left text-gray-600 font-medium">Subtotal</th>
           </tr>
@@ -61,7 +63,10 @@
             <tr>
               <td class="px-4 py-2"><%= index + 1 %></td>
               <td class="px-4 py-2"><%= item.name %></td>
-              <td class="px-4 py-2"><%= item.berat %></td>
+              <td class="px-4 py-2">
+                <%= new Intl.NumberFormat('id-ID').format(item.berat / 1000000) + ' Kg' 
+                %>
+              </td>
               <td class="px-4 py-2">Rp <%= item.harga.toLocaleString('id-ID') %></td>
               <td class="px-4 py-2">Rp <%= item.sub_total.toLocaleString('id-ID') %></td>
             </tr>
