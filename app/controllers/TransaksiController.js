@@ -24,18 +24,18 @@ export const create = async (req, res) => {
   });
 };
 
-      function generateInvoice() {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
+function generateInvoice() {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
 
-        // Ambil 4 digit terakhir dari timestamp
-        const shortTime = String(Date.now()).slice(-4);
+  // Ambil 4 digit terakhir dari timestamp
+  const shortTime = String(Date.now()).slice(-4);
 
-        // Hasil akhir
-        return `INV-${yyyy}${mm}${dd}-${shortTime}`;
-      }
+  // Hasil akhir
+  return `INV-${yyyy}${mm}${dd}-${shortTime}`;
+}
 
 
 export const store = async (req, res) => {

@@ -97,8 +97,8 @@
                     }" 
               class="border-b hover:bg-gray-50">
                 <td class="p-3"><%= i + 1 %></td>
-                <td class="p-3"><%= s.barang.nama_barang %></td>
-                <td class="p-3"><%= s.barang.grade %></td>
+                <td class="p-3"><%= s.barang ? s.barang.nama_barang : '-' %></td>
+                <td class="p-3"><%= s.barang ? s.barang.grade : '-' %></td>
                 <td class="p-3">
                     <button 
                       @click="$dispatch('edit', { id, berat })"
@@ -192,7 +192,7 @@
 
 <script>
   function formatBerat(n) {
-    return new Intl.NumberFormat('id-ID').format(n / 1000000) + ' Kg'
+    return new Intl.NumberFormat('id-ID').format(n)
   }
   function editModal() {
     return {
