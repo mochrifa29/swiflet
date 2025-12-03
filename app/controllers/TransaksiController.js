@@ -16,7 +16,7 @@ export const index = async (req, res) => {
 
 export const create = async (req, res) => {
    // ambil semua barang dari database
-  const stoks = await Stok.find().populate('barang');
+  const stoks = await Stok.find({ready:true}).populate('barang');
   res.render("pages/transaksi/create", {
     title: "Form Transaction",
     layout: "layouts/main",
@@ -42,6 +42,27 @@ export const store = async (req, res) => {
    
     
        const data = req.body;
+
+
+      // Kurangi stok
+        for (const item of data.items) {
+          const stokId = item.id;
+          const stok = await Stok.findById(stokId);
+
+           if (!stok) {
+              console.log("Stok tidak ditemukan untuk ID:", stokId);
+              continue;
+            }
+
+            console.log("Berat awal:", stok.berat, "Dikurangi:", item.berat);
+
+            stok.berat -= item.berat;
+
+            if (stok.berat < 0) stok.berat = 0;
+
+            await stok.save();
+            console.log("Berat akhir:", stok.berat)
+        }
 
        await Transaksi.create({
             invoice:generateInvoice(),

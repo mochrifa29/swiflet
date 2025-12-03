@@ -16,7 +16,7 @@
               <option value="">-- Pilih Barang --</option>
               <% stoks.forEach(s => { %>
                 <option value="<%= s._id %>">
-                  <%= s.barang.nama_barang %>
+                  <%= s.barang.nama_barang %> <%= s.barang.grade %>
                 </option>
               <% }) %>
             </select>
